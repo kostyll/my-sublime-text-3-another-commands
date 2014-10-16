@@ -49,3 +49,14 @@ class ItemizeLatexStringsCommand(sublime_plugin.TextCommand):
                     result_text.append(result_line)
                 # print (result_text)
                 self.view.run_command("insert",{"characters":"\n".join(result_text)})
+
+
+class ShowGitBranchesCommand(sublime_plugin.TextCommand):
+    """
+    Show the list of existing git repo branches
+    """
+    def run(self,edit):
+        file = view.file_name()
+        print (file)
+        directory = os.path.dirname(file)
+        print (directory)
