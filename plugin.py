@@ -60,3 +60,11 @@ class ShowGitBranchesCommand(sublime_plugin.TextCommand):
         print (file)
         directory = os.path.dirname(file)
         print (directory)
+
+
+class SwitchGitBrancheCommand(sublime_plugin.TextCommand):
+    """
+    Switch to git branch
+    """
+    def run(self,edit):
+        pass
