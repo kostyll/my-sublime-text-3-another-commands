@@ -28,7 +28,7 @@ from pyparsing import (
     alphas, nums, alphanums,
     OneOrMore, ZeroOrMore,
     Or, And,
-    Forward, Optional, Group,Suppress
+    Forward, Optional, Group,Suppress, delimitedList
 )
 
 from SSL import ssl
@@ -50,29 +50,43 @@ def plugin_loaded():
     #     return lambda self,amt=None,decode_content=None:func(self,None,decode_content)
     # yandex_translate.requests.packages.urllib3.response.HTTPResponse.stream = urllib3_HTTPResponse_stream_wrapper(func)
     # print ("Plugin RussianVariableTranslate is loaded")
+    test_json_like_parser()
 
 # rus_alphas = 'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ'
 rus_alphas = ""
 comma = ','
 
-string = Word(alphas+rus_alphas+nums+ alphanums)
-quoted_string = Or(string,Or('"' + string + '"',"'"+string + "'"))
+string = OneOrMore(Word(alphas+rus_alphas+nums+ alphanums))
+quoted_string = (string|Suppress('"') + string + Suppress('"')|Suppress("'")+string + Suppress("'"))
 
-number = Word(nums+'.,')
+number = OneOrMore(Word(nums+'.,'))
 
 value = Forward()
 member = Forward()
 array = Forward()
 dict_ = Forward()
 
-elements = OneOrMore(value)
-members = OneOrMore(member)
+elements = delimitedList(value)
+members = delimitedList(member)
 
-member << quoted_string+Suppress(':')+ value
+member << quoted_string+Suppress(':')+Optional(OneOrMore(' '))+ value
 value << (string|quoted_string|number|array|dict_)
 array << Suppress("[") + Optional(elements) + Suppress("]")
 
 dict_ << Suppress("{") + Optional(members) + Suppress("}")
+
+def test_json_like_parser():
+    tests = [
+        """{a:2,'b':[12,"s",5]}""",
+        """{a:2,'b':[12,"s",{a:3,x:2}]}""",
+        """{aaaa:2,'b':[12,"s",5]}""",
+    ]
+    for test in tests:
+        try:
+            dict_.parseString(test)
+            print ("Test\n{}\npassed".format(test))
+        except (Exception) as e:
+            print ("Test\n{}\nfailed with message:{}".format(test,e))
 
 
 
