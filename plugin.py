@@ -26,7 +26,7 @@ import pyparsing
 from pyparsing import (
     Word, Literal,
     alphas, nums, alphanums,
-    OneOrMore, ZeroOrMore,
+    OneOrMore, ZeroOrMore,empty,
     Or, And,
     Forward, Optional, Group,Suppress, delimitedList
 )
@@ -52,14 +52,14 @@ def plugin_loaded():
     # print ("Plugin RussianVariableTranslate is loaded")
     test_json_like_parser()
 
-# rus_alphas = 'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ'
+rus_alphas = 'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ'
 rus_alphas = ""
 comma = ','
 
-string = OneOrMore(Word(alphas+rus_alphas+nums+ alphanums))
-quoted_string = (string|Suppress('"') + string + Suppress('"')|Suppress("'")+string + Suppress("'"))
+string = OneOrMore(Word(alphas+rus_alphas+nums+alphanums+'.'))
+quoted_string = (string|Suppress('"') + string + Suppress('"')|Suppress("'")+string + Suppress("'")|Suppress("'")+Suppress("'")|Suppress('"')+Suppress('"'))
 
-number = OneOrMore(Word(nums+'.,'))
+number = OneOrMore(Word(nums+'.'))
 
 value = Forward()
 member = Forward()
@@ -80,6 +80,8 @@ def test_json_like_parser():
         """{a:2,'b':[12,"s",5]}""",
         """{a:2,'b':[12,"s",{a:3,x:2}]}""",
         """{aaaa:2,'b':[12,"s",5]}""",
+        """{aaaa:2,'b.s':[12,"s",5]}""",
+        """{aaaa:2,b.s:[12,"s",5]}""",
     ]
     for test in tests:
         try:
