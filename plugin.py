@@ -93,6 +93,7 @@ class ItemizeLatexStringsCommand(sublime_plugin.TextCommand):
                 # print (result_text)
                 self.view.run_command("insert",{"characters":"\n".join(result_text)})
 
+
 class PretyDictPrinter(object):
     def __init__(self,text):
         self.text = text
@@ -115,3 +116,22 @@ class PretifyDictDataCommand(sublime_plugin.TextCommand):
                 prety_text = prety_printer.print_pretty()
 
                 # self.view.run_command("insert",{"characters":prety_text})
+
+
+class ShowGitBranchesCommand(sublime_plugin.TextCommand):
+    """
+    Show the list of existing git repo branches
+    """
+    def run(self,edit):
+        file = view.file_name()
+        print (file)
+        directory = os.path.dirname(file)
+        print (directory)
+
+
+class SwitchGitBrancheCommand(sublime_plugin.TextCommand):
+    """
+    Switch to git branch
+    """
+    def run(self,edit):
+        pass
