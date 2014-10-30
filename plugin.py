@@ -2,6 +2,7 @@ import sublime
 import sublime_plugin
 
 # TODO: json-like data parsing neet to be implemented
+# view.run_command("pretify_dict_data")
 
 import os
 import sys
