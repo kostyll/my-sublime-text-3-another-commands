@@ -1,3 +1,6 @@
 [submodule "requests"]
 	path = requests
 	url = git@github.com:kennethreitz/requests.git
+[submodule "thirdparty/pyparsing"]
+	path = thirdparty/pyparsing
+	url = git@github.com:hachibeeDI/pyparsing.git
