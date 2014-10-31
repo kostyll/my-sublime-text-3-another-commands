@@ -275,7 +275,8 @@ class PretifyDictDataCommand(sublime_plugin.TextCommand):
                 pretty_text = prety_printer.get_pretified()
                 print (pretty_text)
 
-                self.view.run_command("insert",{"characters":pretty_text})
+                # self.view.run_command("insert",{"characters":pretty_text})
+                self.view.replace(edit,region,pretty_text)
 
 
 class ShowGitBranchesCommand(sublime_plugin.TextCommand):
