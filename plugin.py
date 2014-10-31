@@ -52,43 +52,95 @@ def plugin_loaded():
     # print ("Plugin RussianVariableTranslate is loaded")
     test_json_like_parser()
 
-rus_alphas = 'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ'
-rus_alphas = ""
-comma = ','
+def json_like_data_parser(text):
+    rus_alphas = 'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ'
+    comma = ','
 
-string = OneOrMore(Word(alphas+rus_alphas+nums+alphanums+'.'))
-quoted_string = (string|Suppress('"') + string + Suppress('"')|Suppress("'")+string + Suppress("'")|Suppress("'")+Suppress("'")|Suppress('"')+Suppress('"'))
+    string = OneOrMore(Word(alphas+rus_alphas+alphanums+'.'))
+    string.setParseAction(lambda t:{
+        'type':'str',
+        'str':t.asList()[0]
+    })
 
-number = OneOrMore(Word(nums+'.'))
+    quoted_string = (
+                     string|
+                     Suppress('"') + Optional(string) + Suppress('"')|
+                     Suppress("'") + Optional(string) + Suppress("'")
+                     )
+    ('string')
+    # quoted_string.setParseAction(lambda t:{
+    #     'str':t.asList()[0]
+    # })
 
-value = Forward()
-member = Forward()
-array = Forward()
-dict_ = Forward()
+    number = OneOrMore(Word(nums+'.'))('number')
+    number.setParseAction(lambda t:{
+        'type':'number',
+        'number':t.asList()[0]
+    })
 
-elements = delimitedList(value)
-members = delimitedList(member)
+    value = Forward()
+    member = Forward()
+    array = Forward()
+    dict_ = Forward()
 
-member << quoted_string+Suppress(':')+Optional(OneOrMore(' '))+ value
-value << (string|quoted_string|number|array|dict_)
-array << Suppress("[") + Optional(elements) + Suppress("]")
+    elements = delimitedList(value)
+    ('elements')
 
-dict_ << Suppress("{") + Optional(members) + Suppress("}")
+    members = delimitedList(member)
+    ('members')
+
+    member << (
+               value+Suppress(':')+Optional(ZeroOrMore(' '))+value
+               )
+    ('member')
+    member.setParseAction(lambda t:{
+        'key':t.asList()[0],
+        'value':t.asList()[1]
+    })
+
+
+    value << (
+              number|
+              string|
+              quoted_string|
+              array|
+              dict_
+              )
+    ('value')
+
+    array << (Suppress("[") + Optional(elements) + Suppress("]"))
+    ('array')
+
+    dict_ << (Suppress("{") + Optional(members) + Suppress("}"))
+    ('dict')
+    dict_.setParseAction(lambda t: {
+                        'members':t.asList()
+                    })
+
+    return dict_.parseString(text).asList()
 
 def test_json_like_parser():
+    passed = failed = 0
     tests = [
         """{a:2,'b':[12,"s",5]}""",
         """{a:2,'b':[12,"s",{a:3,x:2}]}""",
         """{aaaa:2,'b':[12,"s",5]}""",
         """{aaaa:2,'b.s':[12,"s",5]}""",
         """{aaaa:2,b.s:[12,"s",5]}""",
+        """{'їійцукенгшщзхъфывапролджэячсмитьбюІЇЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮ':\t\t3}""",
+        """{1:2,b.1:3.3,b.s:[12,"s",5]}""",
     ]
     for test in tests:
         try:
-            dict_.parseString(test)
+            print ("TEST:")
+            print (json_like_data_parser(test))
             print ("Test\n{}\npassed".format(test))
+            passed += 1
         except (Exception) as e:
             print ("Test\n{}\nfailed with message:{}".format(test,e))
+            # break
+            failed += 1
+    print ("Passed {},Failed {} tests".format(passed,failed))
 
 
 
